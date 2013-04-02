@@ -75,7 +75,7 @@ int main(int argc,char *argv[])
 		}
 	}
 
-	priority_queue<edge,vector<edge>,mycomparison> edges  = priority_queue<edge,vector<edge>,mycomparison>(mycomparison());
+	priority_queue<edge,vector<edge>,mycomparison> edges = priority_queue<edge,vector<edge>,mycomparison>(mycomparison());
 	vector<vector<node>> nodes (image.height(), vector<node>(image.width(), node()));
 
 	for(int i=0; i<image.height(); i++)
