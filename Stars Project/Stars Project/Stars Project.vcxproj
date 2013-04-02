@@ -81,6 +81,10 @@
   <ItemGroup>
     <ClInclude Include="CImg.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="STARS.bmp" />
+    <Image Include="STARSOrig.bmp" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
