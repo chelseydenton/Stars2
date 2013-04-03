@@ -71,7 +71,7 @@ int main(int argc,char *argv[])
 			int ri = image(j, i, 0, 0);
 			int gi = image(j, i, 0, 1);
 			int bi = image(j, i, 0, 2);
-			blackAndWhite(j, i, 0, 0)  = 0.2989f*ri +  0.5870f*gi + 0.1140f*bi;
+			blackAndWhite(j, i, 0, 0)  = (char)(0.2989f*ri +  0.5870f*gi + 0.1140f*bi);
 		}
 	}
 
@@ -86,32 +86,32 @@ int main(int argc,char *argv[])
 		}
 	}
 
-	for(int i=0; i<image.height(); i++)
-	{
-		for(int j=0; j<image.width(); j++)
-		{
-			bool endCol = j == (image.width()-1);
-			bool endRow = i == (image.height() -1);
-			if(endCol && endRow)
-			{
+	//for(int i=0; i<image.height(); i++)
+	//{
+	//	for(int j=0; j<image.width(); j++)
+	//	{
+	//		bool endCol = j == (image.width()-1);
+	//		bool endRow = i == (image.height() -1);
+	//		if(endCol && endRow)
+	//		{
 
-			}
-			else if(endCol)
-			{
-				edges.push(edge(nodes[i][j], nodes[i+1][j]));
-			}
-			else if(endRow)
-			{
-				edges.push(edge(nodes[i][j], nodes[i][j+1]));
-			}
-			else
-			{
-				edges.push(edge(nodes[i][j], nodes[i][j+1]));
-				edges.push(edge(nodes[i][j], nodes[i+1][j]));
-				edges.push(edge(nodes[i][j], nodes[i+1][j+1]));
-			}
-		}
-	}
+	//		}
+	//		else if(endCol)
+	//		{
+	//			edges.push(edge(nodes[i][j], nodes[i+1][j]));
+	//		}
+	//		else if(endRow)
+	//		{
+	//			edges.push(edge(nodes[i][j], nodes[i][j+1]));
+	//		}
+	//		else
+	//		{
+	//			edges.push(edge(nodes[i][j], nodes[i][j+1]));
+	//			edges.push(edge(nodes[i][j], nodes[i+1][j]));
+	//			edges.push(edge(nodes[i][j], nodes[i+1][j+1]));
+	//		}
+	//	}
+	//}
 	
 	CImgDisplay main_disp(image,"Stars"), disp_2(blackAndWhite, "greyscale");
 	while (!main_disp.is_closed() && !disp_2.is_closed()) {
