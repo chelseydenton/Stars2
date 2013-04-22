@@ -14,43 +14,24 @@ class DisjointSet
                 int x, y;
                 int rank;
                 Node* parent;
-                Node() : x(0), y(0), rank(0), parent(this) { } // the constructor does MakeSet
+                Node() : x(0), y(0), rank(0), parent(this) { }
         };
         Node* find(Node*);
-        Node* merge(Node*, Node*); // Union
-        bool merge2(Node*, Node*); // Union
+        bool _union(Node*, Node*); // Union
 };
 DisjointSet::Node*   DisjointSet::find(DisjointSet::Node* n)
 {
     if (n != n->parent) {
-        n->parent = find(n->parent);
+        n->parent = find(n->parent); //recursively find the parent
     }
     return n->parent;
 }
-DisjointSet::Node*   DisjointSet::merge(DisjointSet::Node* x, DisjointSet::Node* y)
-{
-    x = find(x);
-    y = find(y);
-
-	if(x == y)
-		return NULL;
-
-    if (x->rank > y->rank) {
-        y->parent = x;
-    } else {
-        x->parent = y;
-        if (x->rank == y->rank) {
-            ++(y->rank);
-        }
-    }
-	return NULL;
-}
-bool DisjointSet::merge2(DisjointSet::Node* x, DisjointSet::Node* y)
+bool DisjointSet::_union(DisjointSet::Node* x, DisjointSet::Node* y)
 {
 	x = find(x);
     y = find(y);
 
-	if(x == y)
+	if(x == y) //discard edges which would create a cycle
 		return false;
 
     if (x->rank > y->rank) {
@@ -61,7 +42,7 @@ bool DisjointSet::merge2(DisjointSet::Node* x, DisjointSet::Node* y)
             ++(y->rank);
         }
     }
-	return true;
+	return true; //return true if the edge is included
 }
 
 class edge
@@ -69,7 +50,7 @@ class edge
 public:
 	DisjointSet::Node *node1;
 	DisjointSet::Node *node2;
-	int val;
+	int val; //edge weight
 	edge()
 	{
 
@@ -100,7 +81,7 @@ vector<edge> edges;
 vector<DisjointSet::Node> starNodes;
 
 
-char* fileName = "C:\\Users\\cdent_000\\Documents\\GitHub\\Stars2\\stars6.bmp";
+char* fileName = "C:\\Users\\cdent_000\\Documents\\GitHub\\Stars2\\STARSOrig.bmp";
 CImg<unsigned char> image(fileName);
 CImg<unsigned char> blackAndWhite(image.width(), image.height(), 1, 1);
 
@@ -122,6 +103,7 @@ void Reset()
 }
 void GetEdges()
 {
+	//find the edges between every adjacent pixel by each pixel accounting for just half the adjacent pixels to avoid redundant edges
 	for(int i=0; i<image.height(); i++)
 	{
 		for(int j=0; j<image.width(); j++)
@@ -139,14 +121,18 @@ void GetEdges()
 }
 void CreateForest()
 {
+	//assuming the edges have already been sorted, begin adding them to the tree
+	//merge discards edge if it would create a cycle
 	while(!edges.empty() && edges.back().val >= cuttOff)
 	{
-		set.merge(edges.back().node1, edges.back().node2);
+		set._union(edges.back().node1, edges.back().node2);
 		edges.pop_back();
 	}
 }
 void FindStars()
 {
+	//any node who has a node (other than itself) which uses it as it's root node can be considered the
+	// root of a tree, so set a boolean to true at each pixels where there is a root
 	for(int i=0; i<image.height(); i++)
 	{
 		for(int j=0; j<image.width(); j++)
@@ -159,6 +145,7 @@ void FindStars()
 			}
 		}
 	}
+	//use the booleans to create an array of star nodes
 	for(int i=0; i<image.height(); i++)
 	{
 		for(int j=0; j<image.width(); j++)
@@ -172,6 +159,7 @@ CImg<unsigned char> ConstellationImage()
 {
 	vector<edge> edges;
 	vector<edge> usedEdges;
+	//find all the edges and reset the connections between the star nodes
 	for(int node1 = 0; node1 < starNodes.size(); node1++)
 	{
 		starNodes[node1].rank = 0;
@@ -181,11 +169,12 @@ CImg<unsigned char> ConstellationImage()
 			edges.push_back(edge(&starNodes[node1], &starNodes[node2], sqrt(pow(starNodes[node1].x - starNodes[node2].x, 2) + pow(starNodes[node1].y - starNodes[node2].y, 2))));
 		}
 	}
+	//create a minimum spanning tree of the stars 
 	std::sort(edges.begin(), edges.end(), compare2);
-	while(!edges.empty() && usedEdges.size() < starNodes.size())//&& edges.back().val < 50)
+	while(!edges.empty() && usedEdges.size() < starNodes.size())//the minimum spanning tree will only contain n-1 edges
 	{
-		if (set.merge2(edges.back().node1, edges.back().node2))
-			usedEdges.push_back(edges.back());
+		if (set._union(edges.back().node1, edges.back().node2))
+			usedEdges.push_back(edges.back()); //save the edges to be displayed later
 		edges.pop_back();
 	}
 	CImg<unsigned char> image(fileName);
@@ -193,11 +182,13 @@ CImg<unsigned char> ConstellationImage()
 	int remove = usedEdges.size()/10;
 	while(!usedEdges.empty())
 	{
+		//draw the edges on the minimum spanning tree, but skip the last few to show it like a forest so it's not one big constellation
 		if(i > remove)
 			image.draw_line(usedEdges.back().node1->x, usedEdges.back().node1->y, usedEdges.back().node2->x, usedEdges.back().node2->y, color);
 		usedEdges.pop_back();
 		i++;
 	}
+	//draw dots at all the stars
 	for (std::vector<DisjointSet::Node>::iterator it = starNodes.begin() ; it != starNodes.end(); ++it)
 	{
 			image.draw_circle(it->x, it->y, 2, color2);
